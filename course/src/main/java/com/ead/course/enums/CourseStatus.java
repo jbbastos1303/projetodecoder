@@ -1,2 +1,6 @@
-package com.ead.course.enums;public class CourseStatus {
+package com.ead.course.enums;
+
+public enum CourseStatus {
+    INPROGRESS,
+    CONCLUDED;
 }
