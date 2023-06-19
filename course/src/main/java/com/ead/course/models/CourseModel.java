@@ -5,11 +5,11 @@ import com.ead.course.enums.CourseStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -52,5 +52,13 @@ public class CourseModel implements Serializable {
     @Fetch(FetchMode.SUBSELECT) // faz uma consulta para cursos e uma para módulos(se definir JOIN ele ignora o LAZY)
     //@OnDelete(action = OnDeleteAction.CASCADE) //controle da exclusão é delegado para o banco
     private Set<ModuleModel> modules;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
+    private Set<CourseUserModel> coursesUsers;
+
+    public CourseUserModel convertToCourseUserModel(UUID userId){
+        return new CourseUserModel(null, this, userId);
+    }
 
 }
