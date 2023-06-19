@@ -37,8 +37,16 @@ public class UserController {
     @GetMapping
     public ResponseEntity<Page<UserModel>> getAllUsers(SpecificationTemplate.UserSpec spec,
                                                        @PageableDefault(page = 0, size = 10, sort = "userId", direction = Sort.Direction.ASC)
-                                                       Pageable pageable){
-        Page<UserModel> userModelPage = userService.findAll(spec, pageable);
+                                                       Pageable pageable,
+                                                       @RequestParam(required = false) UUID courseId)
+    {
+        Page<UserModel> userModelPage = null;
+        if(courseId != null){
+            userModelPage = userService.findAll(SpecificationTemplate.userCourseId(courseId).and(spec), pageable);
+        }else{
+            userModelPage = userService.findAll(spec, pageable);
+        }
+
         if(!userModelPage.isEmpty()){
             for(UserModel user : userModelPage.toList()){
                 user.add(linkTo(methodOn(UserController.class).getOneUser(user.getUserId())).withSelfRel());
@@ -87,7 +95,7 @@ public class UserController {
             userModel.setCpf(userDTO.getCpf());
             userModel.setLastUpdateDate(LocalDateTime.now(ZoneId.of("UTC")));
             userService.salvar(userModel);
-            log.debug("POST updateUser userModel saved {} ", userDTO.toString());
+            log.debug("POST updateUser userModel saved {} ", userModel.getUserId());
             log.info("Usuário {} foi atualizado com sucesso", userModel.getUserId());
             return ResponseEntity.status(HttpStatus.OK).body(userModel);
         }
@@ -112,8 +120,8 @@ public class UserController {
             userModel.setPassword(userDTO.getPassword());
             userModel.setLastUpdateDate(LocalDateTime.now(ZoneId.of("UTC")));
             userService.salvar(userModel);
-            log.debug("PUT updatePassword userId saved {} ", userId);
-            log.info("A senha do usuário {} foi atualizada com sucesso", userId);
+            log.debug("PUT updatePassword userId saved {} ", userModel.getUserId());
+            log.info("A senha do usuário {} foi atualizada com sucesso", userModel.getUserId());
             return ResponseEntity.status(HttpStatus.OK).body("Senha atualizada com sucesso!");
         }
     }
